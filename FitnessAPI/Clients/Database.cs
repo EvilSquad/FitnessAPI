@@ -11,7 +11,6 @@ namespace FitnessAPI.Clients
     {
         NpgsqlConnection con = new NpgsqlConnection(Constants.database);
         List<Exercise> exercises = new List<Exercise>();
-        //public async Task InsertExerciseAsync(Exercise exercises, int userID)
         public async Task InsertExerciseAsync(Exercise exercise)
         {
             var sql = "INSERT into public.\"Exercises\"(\"Name\", \"Type\", \"Muscle\", \"Equipment\", \"Difficulty\", \"Instructions\", \"UserID\")"
@@ -39,47 +38,42 @@ namespace FitnessAPI.Clients
             await con.CloseAsync();
         }
 
-        public async Task PutExerciseAsync(int id, string name, string type, string muscle, string equipment, string difficulty, string instructions, long userID)
+        public async Task PutExerciseAsync(Exercise exercise)
         {
             var sql = "UPDATE public.\"Exercises\" set \"Name\" = @Name, \"Type\" = @Type, \"Muscle\" = @Muscle, \"Equipment\" = @Equipment, \"Difficulty\" = @Difficulty, \"Instructions\" = @Instructions WHERE \"ID\" = @Id AND \"UserID\" = @UserID";
             NpgsqlCommand comm = new NpgsqlCommand(sql, con);
-            //comm.Parameters.AddWithValue("Name", exercise.name);
-            //comm.Parameters.AddWithValue("Type", exercise.type);
-            //comm.Parameters.AddWithValue("Muscle", exercise.muscle);
-            //comm.Parameters.AddWithValue("Equipment", exercise.equipment);
-            //comm.Parameters.AddWithValue("Difficulty", exercise.difficulty);
-            //comm.Parameters.AddWithValue("Instructions", exercise.instructions);
-            comm.Parameters.AddWithValue("Name", name);
-            comm.Parameters.AddWithValue("Type", type);
-            comm.Parameters.AddWithValue("Muscle", muscle);
-            comm.Parameters.AddWithValue("Equipment", equipment);
-            comm.Parameters.AddWithValue("Difficulty", difficulty);
-            comm.Parameters.AddWithValue("Instructions", instructions);
-            comm.Parameters.AddWithValue("Id", id);
-            comm.Parameters.AddWithValue("UserID", userID);
+            comm.Parameters.AddWithValue("Name", exercise.name);
+            comm.Parameters.AddWithValue("Type", exercise.type);
+            comm.Parameters.AddWithValue("Muscle", exercise.muscle);
+            comm.Parameters.AddWithValue("Equipment", exercise.equipment);
+            comm.Parameters.AddWithValue("Difficulty", exercise.difficulty);
+            comm.Parameters.AddWithValue("Instructions", exercise.instructions);
+            comm.Parameters.AddWithValue("Id", exercise.id);
+            comm.Parameters.AddWithValue("UserID", exercise.userid);
             await con.OpenAsync();
             await comm.ExecuteNonQueryAsync();
             await con.CloseAsync();
         }
 
-        public async Task<List<Exercise>> GetExerciseByIdAsync(int id, long userId)
+        public async Task<List<Exercise>> GetExerciseByNameAsync(string name, long userId)
         {
             await con.OpenAsync();
-            var sql = "SELECT * from public.\"Exercises\" where \"ID\" = @Id AND \"UserID\" = @UserID";
+            var sql = "SELECT * from public.\"Exercises\" where \"Name\" = @Name AND \"UserID\" = @UserID";
             NpgsqlCommand comm = new NpgsqlCommand(sql, con);
-            comm.Parameters.AddWithValue("Id", id);
+            comm.Parameters.AddWithValue("Name", name);
             comm.Parameters.AddWithValue("UserID", userId);
             NpgsqlDataReader npgsqlDataReader = await comm.ExecuteReaderAsync();
             while (await npgsqlDataReader.ReadAsync())
             {
-                exercises.Add(new Exercise
-                {
+                exercises.Add(new Exercise {
                     name = npgsqlDataReader.GetString(0),
                     type = npgsqlDataReader.GetString(1),
                     muscle = npgsqlDataReader.GetString(2),
                     equipment = npgsqlDataReader.GetString(3),
                     difficulty = npgsqlDataReader.GetString(4),
-                    instructions = npgsqlDataReader.GetString(5)
+                    instructions = npgsqlDataReader.GetString(5),
+                    userid = npgsqlDataReader.GetInt64(6),
+                    id = npgsqlDataReader.GetInt32(7)
                 });
             }
             await con.CloseAsync();
@@ -102,8 +96,10 @@ namespace FitnessAPI.Clients
                     muscle = npgsqlDataReader.GetString(2),
                     equipment = npgsqlDataReader.GetString(3),
                     difficulty = npgsqlDataReader.GetString(4),
-                    instructions = npgsqlDataReader.GetString(5)
-                });
+                    instructions = npgsqlDataReader.GetString(5),
+                    userid = npgsqlDataReader.GetInt64(6),
+                    id = npgsqlDataReader.GetInt32(7)
+                });;
             }
             await con.CloseAsync();
             return exercises;

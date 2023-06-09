@@ -20,17 +20,16 @@ namespace FitnessAPI.Controllers
             return Ok();
         }
 
-        [HttpDelete("exercises/delete/id/{userID}/{id}")]
+        [HttpDelete("exercises/delete/{userID}/{id}")]
         public async Task<IActionResult> DeleteExercise(int id, long userID) {
             await exercises.DeleteExerciseByIdAsync(id, userID);
             return Ok();
 
         }
 
-        [HttpPut("exercises/insert/{userID}/{id}")]
-        //public async Task<IActionResult> PutExercise(int id, [FromBody] Exercise exercise, int userID) {
-        public async Task<IActionResult> PutExercise(int id, string name, string type, string muscle, string equipment, string difficulty, string instructions, long userID) {
-            await exercises.PutExerciseAsync(id, name, type, muscle, equipment, difficulty, instructions, userID);
+        [HttpPut("exercises/insert")]
+        public async Task<IActionResult> PutExercise(Exercise exercise) {
+            await exercises.PutExerciseAsync(exercise);
             return Ok();
         }
 
@@ -39,9 +38,9 @@ namespace FitnessAPI.Controllers
             return exercises.GetAllExerciseAsync(userID);
         }
 
-        [HttpGet("exercises/get/id/{userID}/{id}")]
-        public Task<List<Exercise>> GetExerciseById(int id, long userID) {
-            return exercises.GetExerciseByIdAsync(id, userID);
+        [HttpGet("exercises/get/{userID}/{name}")]
+        public Task<List<Exercise>> GetExerciseByName(long userID, string name) {
+            return exercises.GetExerciseByNameAsync(name, userID);
         }
 
         [HttpGet("exercises/get/muscle/{userID}/{muscle}")]
